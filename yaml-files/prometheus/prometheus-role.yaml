@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+# kubernetes versions before 1.8.0 should use rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: prometheus-role
+  namespace: monitoring
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources:
+  - pods
+  verbs: ["get", "list", "watch"]
+

@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    qcloud-app: receiver
+  name: receiver
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      qcloud-app: receiver
+  template:
+    metadata:
+      labels:
+        qcloud-app: receiver
+    spec:
+      containers:
+      - args:
+        - --addr=0.0.0.0:8080
+        - --defaultPolicyId=cm-rs67auyk
+        command:
+        - /usr/bin/webhook-server
+        env:
+        - name: QCloudMonitorAPIRegion
+          value: ap-guangzhou
+        - name: QCloudSecretId
+          value: XXXXX
+        - name: QCloudSecretKey
+          value: XXXXX
+        image: docker.oa.com:8080/public/webhook-receiver:v0.1
+        imagePullPolicy: Always
+        name: receiver
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        securityContext:
+          privileged: false
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      restartPolicy: Always
+

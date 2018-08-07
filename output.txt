@@ -1,0 +1,33 @@
+== Info: About to connect() to 10.105.64.139 port 8081 (#0)
+== Info:   Trying 10.105.64.139...
+== Info: Connected to 10.105.64.139 (10.105.64.139) port 8081 (#0)
+=> Send header, 82 bytes (0x52)
+0000: 47 45 54 20 2f 20 48 54 54 50 2f 31 2e 31 0d 0a GET / HTTP/1.1..
+0010: 55 73 65 72 2d 41 67 65 6e 74 3a 20 63 75 72 6c User-Agent: curl
+0020: 2f 37 2e 32 39 2e 30 0d 0a 48 6f 73 74 3a 20 31 /7.29.0..Host: 1
+0030: 30 2e 31 30 35 2e 36 34 2e 31 33 39 3a 38 30 38 0.105.64.139:808
+0040: 31 0d 0a 41 63 63 65 70 74 3a 20 2a 2f 2a 0d 0a 1..Accept: */*..
+0050: 0d 0a                                           ..
+<= Recv header, 20 bytes (0x14)
+0000: 48 54 54 50 2f 31 2e 31 20 33 30 32 20 46 6f 75 HTTP/1.1 302 Fou
+0010: 6e 64 0d 0a                                     nd..
+<= Recv header, 40 bytes (0x28)
+0000: 43 6f 6e 74 65 6e 74 2d 54 79 70 65 3a 20 74 65 Content-Type: te
+0010: 78 74 2f 68 74 6d 6c 3b 20 63 68 61 72 73 65 74 xt/html; charset
+0020: 3d 75 74 66 2d 38 0d 0a                         =utf-8..
+<= Recv header, 18 bytes (0x12)
+0000: 4c 6f 63 61 74 69 6f 6e 3a 20 2f 67 72 61 70 68 Location: /graph
+0010: 0d 0a                                           ..
+<= Recv header, 37 bytes (0x25)
+0000: 44 61 74 65 3a 20 54 68 75 2c 20 31 39 20 4a 75 Date: Thu, 19 Ju
+0010: 6c 20 32 30 31 38 20 30 38 3a 30 36 3a 33 32 20 l 2018 08:06:32 
+0020: 47 4d 54 0d 0a                                  GMT..
+<= Recv header, 20 bytes (0x14)
+0000: 43 6f 6e 74 65 6e 74 2d 4c 65 6e 67 74 68 3a 20 Content-Length: 
+0010: 32 39 0d 0a                                     29..
+<= Recv header, 2 bytes (0x2)
+0000: 0d 0a                                           ..
+<= Recv data, 29 bytes (0x1d)
+0000: 3c 61 20 68 72 65 66 3d 22 2f 67 72 61 70 68 22 <a href="/graph"
+0010: 3e 46 6f 75 6e 64 3c 2f 61 3e 2e 0a 0a          >Found</a>...
+== Info: Connection #0 to host 10.105.64.139 left intact

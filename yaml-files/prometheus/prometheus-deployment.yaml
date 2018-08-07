@@ -1,0 +1,67 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: monitoring
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus-service-account
+      containers:
+      - args:
+        - /bin/prometheus
+          --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/data --web.console.libraries=/usr/share/prometheus/console_libraries
+          --web.console.templates=/usr/share/prometheus/consoles --storage.tsdb.no-lockfile
+        command:
+        - /bin/sh
+        - -c
+        image: docker.oa.com:8080/public/prometheus:v2.2.1
+        imagePullPolicy: Always
+        name: prometheus
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        securityContext:
+          privileged: false 
+          runAsUser: 0
+        volumeMounts:
+        - mountPath: /etc/prometheus
+          name: config
+          readOnly: true
+        - mountPath: /data
+          name: test-path 
+        - mountPath: /etc/hosts
+          name: host-path
+        # - mountPath: /cbs
+        #  name: data-cbs
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: prometheus-config
+        name: config
+      - name: test-path
+        hostPath:
+          path: /data
+          type: Directory
+      - name: host-path
+        hostPath:
+          path: /etc/hosts
+#      - persistentVolumeClaim:
+#          claimName: prometheus-cbs
+#        name: data-cbs

@@ -1,0 +1,67 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    cloud.tencent.com/volume-configmap-info: '[{"name":"config","volumeType":"configMap","nfsPath":"","fsType":"","configId":"ccscf-927ooi4p","configVersion":"0.3","configVersionId":"ccscv-onbucwyj","configKeys":["config.yml"]}]'
+  labels:
+    qcloud-app: alertmanager
+  name: alertmanager
+  namespace: monitoring
+spec:
+  minReadySeconds: 10
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      qcloud-app: alertmanager
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        cloud.tencent.com/volume-configmap-info: '[{"name":"config","volumeType":"configMap","nfsPath":"","fsType":"","configId":"ccscf-927ooi4p","configVersion":"0.3","configVersionId":"ccscv-onbucwyj","configKeys":["config.yml"]}]'
+      creationTimestamp: null
+      labels:
+        qcloud-app: alertmanager
+    spec:
+      containers:
+      - args:
+        - --config.file=/etc/alertmanager/config.yml
+        - --storage.path=/alertmanager
+        - --log.level=debug
+        command:
+        - /bin/alertmanager
+        image: docker.oa.com:8080/public/alertmanager:latest
+        imagePullPolicy: Always
+        name: alertmanager
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        securityContext:
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/alertmanager
+          name: config
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: alertmanager-config
+        name: config
+

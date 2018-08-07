@@ -1,0 +1,66 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: grafana
+  name: grafana
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: dangerous
+        image: docker.oa.com:8080/public/grafana:5.0.2
+        imagePullPolicy: Always
+        name: grafana
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        securityContext:
+          privileged: false
+        volumeMounts:
+        - mountPath: /etc/grafana/grafana.ini
+          name: grafana-ini-config
+          subPath: grafana.ini
+        - mountPath: /etc/grafana/provisioning/datasources/prometheus-datasource.yml
+          name: grafana-datasource-config
+          subPath: prometheus-datasource.yml
+        - mountPath: /etc/grafana/provisioning/dashboards/sample.yaml
+          name: grafana-dashboards-ini-config
+          subPath: sample.yaml
+        - mountPath: /data
+          name: grafana-dashboards-config
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: grafana-ini-config
+        name: grafana-ini-config
+      - configMap:
+          defaultMode: 420
+          name: grafana-datasource-config
+        name: grafana-datasource-config
+      - configMap:
+          defaultMode: 420
+          name: grafana-dashboards-ini-config
+        name: grafana-dashboards-ini-config
+      - configMap:
+          defaultMode: 420
+          name: grafana-dashboards-config
+        name: grafana-dashboards-config

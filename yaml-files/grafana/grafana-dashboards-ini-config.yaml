@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  sample.yaml: |
+    apiVersion: 1
+    providers:
+     - name: 'default'
+       orgId: 1
+       folder: 'Gerneral'
+       type: file
+       options:
+         path: /data
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards-ini-config
+  namespace: monitoring

@@ -1,0 +1,78 @@
+apiVersion: v1
+data:
+  config.yml: |-
+    global:
+      resolve_timeout: 5m
+      pagerduty_url: https://events.xxxrduty.com/v2/enqueue
+      hipchat_api_url: https://api.hipcxxxhat.com/
+      opsgenie_api_url: https://api.opsgexxxnie.com/
+      wechat_api_url: https://qyapi.weixixxxxn.qq.com/cgi-bin/
+      victorops_api_url: https://alert.victorxxxxops.com/integrations/generic/20131114/alert/
+    route:
+      receiver: 'tencent-cloud-webhook-translator'
+      routes:
+      - receiver: 'tencent-cloud-webhook-translator'
+        group_by: [node]
+        group_wait: 30s
+        group_interval: 1m
+        repeat_interval: 5m
+        continue: true
+        match_re:
+          alertname: K8sNodeCpuUsageHigh|K8sNodeMemUsageHigh|K8sNodeNotReady|K8sNodeStatusException
+      - receiver: 'tencent-cloud-webhook-translator'
+        group_by: [pod_name]
+        group_wait: 30s
+        group_interval: 1m
+        repeat_interval: 5m
+        continue: true
+        match_re:
+          alertname: K8sPodStatusException|PodTrafficSurge
+      - receiver: 'tencent-cloud-webhook-translator'
+        group_by: [deployment]
+        group_wait: 30s
+        group_interval: 1m
+        repeat_interval: 5m
+        continue: true
+        match_re:
+          alertname: ReplicasAvailabledZore
+      - receiver: 'tencent-cloud-webhook-translator'
+        group_by: [job, service, alertname]
+        group_wait: 30s
+        group_interval: 1m
+        repeat_interval: 5m
+        continue: true
+        match_re:
+          alertname: MemUsageHigh|ProcessDown|ProcessDownLongTime|CpuUsageHigh
+      - receiver: 'tencent-cloud-webhook-translator'
+        group_by: [url]
+        group_wait: 30s
+        group_interval: 1m
+        repeat_interval: 5m
+        continue: true
+        match:
+          alertname: PingCheckFailed
+      - receiver: 'tencent-cloud-webhook-translator'
+        group_by: [server]
+        group_wait: 30s
+        group_interval: 1m
+        repeat_interval: 5m
+        continue: true
+        match:
+          alertname: HttpCheckFailed
+      - receiver: 'tencent-cloud-webhook-translator'
+        group_by: [job]
+        group_wait: 30s
+        group_interval: 1m
+        repeat_interval: 5m
+        continue: true
+        match:
+          alertname: TargetIsDown
+    receivers:
+    - name: 'tencent-cloud-webhook-translator'
+      webhook_configs:
+      - url: 'http://receiver:8080/alerts'
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: monitoring
+

@@ -1,0 +1,13 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+   name: prometheus-cbs
+   namespace: monitoring
+#   annotations:
+#     volume.beta.kubernetes.io/storage-class: cbs
+spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 10Gi

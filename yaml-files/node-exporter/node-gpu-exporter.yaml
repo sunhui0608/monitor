@@ -1,0 +1,68 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: node-gpu-exporter
+  namespace: monitoring
+spec:
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+      name: node-gpu-exporter
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-gpu-exporter
+                operator: In
+                values:
+                - "true"
+      containers:
+      - image: docker.oa.com:8080/public/node-exporter:v0.16.0
+        name: node-exporter
+        args:
+        - --path.procfs=/host/proc
+        - --path.sysfs=/host/sys
+        - --collector.textfile.directory=/run/prometheus
+        volumeMounts:
+        - name: host-proc
+          mountPath: /host/proc
+        - name: host-sys
+          mountPath: /host/sys
+        - name: collector-textfiles
+          readOnly: true
+          mountPath: /run/prometheus
+      - name: node-gpu-exporter
+        image: docker.oa.com:8080/public/dcgm-exporter:gaia
+        resources:
+           limits:
+             tencent.com/vcuda-core: "20"
+             tencent.com/vcuda-memory: "4"
+           requests:
+             cpu: "1"
+             memory: 1Gi
+             tencent.com/vcuda-core: "20"
+             tencent.com/vcuda-memory: "4"
+        securityContext:
+          capabilities:
+            add:
+            - ALL
+            - NET_ADMIN
+            - SYS_ADMIN
+          runAsNonRoot: false
+          runAsUser: 0
+        volumeMounts:
+          - name: collector-textfiles
+            mountPath: /run/prometheus
+      volumes:
+        - name: collector-textfiles
+          emptyDir:
+            medium: Memory
+        - name: host-proc
+          hostPath:
+            path: /proc
+        - name: host-sys
+          hostPath:
+            path: /sys

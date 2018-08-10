@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: node-cpu-exporter
+  namespace: monitoring
+spec:
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+      name: node-cpu-exporter
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-gpu-exporter
+                operator: DoesNotExist 
+      containers:
+      - image: docker.oa.com:8080/public/node-exporter:v0.16.0
+        name: node-exporter
+        args:
+        - --path.procfs=/host/proc
+        - --path.sysfs=/host/sys
+        - --collector.textfile.directory=/run/prometheus
+        volumeMounts:
+        - name: host-proc
+          mountPath: /host/proc
+        - name: host-sys
+          mountPath: /host/sys
+      volumes:
+        - name: host-proc
+          hostPath:
+            path: /proc
+        - name: host-sys
+          hostPath:
+            path: /sys

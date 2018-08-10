@@ -1,0 +1,150 @@
+apiVersion: v1
+data:
+  kubernetes.rules : |
+    groups:
+    - name: TCE
+      rules:
+      - alert: K8sNodeCpuUsageHigh
+        expr: sum by (node) (kube_pod_container_resource_requests_cpu_cores) > sum by(node)(kube_node_status_allocatable_cpu_cores)
+        for: 10s
+        labels:
+          policyId: "cm-l9mzpdz6"
+        annotations:
+          summary: "K8s Node {{ $labels.node }} CPU 达到阈值"
+      - alert: K8sNodeMemUsageHigh
+        expr: sum by (node)(kube_pod_container_resource_requests_memory_bytes) > sum by(node) (kube_node_status_allocatable_memory_bytes)
+        for: 10s
+        labels:
+          policyId: "cm-l9mzpdz6"
+        annotations:
+          summary: "K8s Node {{ $labels.node }} 内存达到阈值"
+      - alert: K8sNodeNotReady
+        expr: kube_node_status_condition{condition="Ready", status="false"} == 1
+        for: 10s
+        labels:
+          policyId: "cm-rs67auyk"
+        annotations:
+          summary: "K8s Node {{ labels.node }} 状态为NotReady"
+      - alert: K8sNodeStatusException
+        expr: kube_node_status_condition{condition!="Ready", status="true"} == 1
+        for: 900s
+        labels:
+          policyId: "cm-l9mzpdz6"
+        annotations:
+          summary: "K8s Node 超过15分钟状态异常！ 状态为 {{ $labels.condition }}"
+      - alert: K8sPodStatusException
+        expr: count(kube_pod_status_phase{phase!="Running"} == 1) > 2
+        for: 600s
+        labels:
+          policyId: "cm-l9mzpdz6"
+        annotations:
+          summary: "K8s 有超过2个Pod状态异常超过10分钟"
+      - alert: PingCheckFailed
+        expr: ping_result_code != 0
+        for: 10s
+        labels:
+          policyId: "cm-l9mzpdz6"
+        annotations:
+          summary: "Ping 检查失败，主机 {{ $labels.url }}"
+      - alert: CpuUsageHigh
+        expr: cpu_usage_idle{cpu="cpu-total"} < 15
+        for: 10s
+        labels:
+          policyId: "cm-l9mzpdz6"
+        annotations:
+          summary: "主机 {{ $labels.job }} CPU 使用率高，当前空闲值 {{ $value }}%"
+      - alert: MemUsageHigh
+        expr: mem_used_percent > 85
+        for: 10s
+        labels:
+          policyId: "cm-rs67auyk"
+        annotations:
+          summary: "主机 {{ $labels.job }} Mem 使用率高，当前使用率 {{ $value }}%"
+      - alert: ProcessDown
+        expr: exec_is_active_status != 0
+        labels:
+          policyId: "cm-l9mzpdz6"
+        annotations:
+          summary: "进程未启动 {{ $labels.service }}, 主机 {{ $labels.job }}"
+      - alert: ProcessDownLongTime
+        expr: exec_is_active_status != 0
+        for: 180s
+        labels:
+          policyId: "cm-l9mzpdz6"
+        annotations:
+          summary: "进程未启动 {{ $labels.service }} 超过 3 分钟, 主机 {{ $labels.job }}"
+      - alert: HttpCheckFailed
+        expr: http_response_http_response_code != 200
+        for: 180s
+        labels:
+          policyId: "cm-l9mzpdz6"
+        annotations:
+          summary: "Http 检查失败，地址 {{ $labels.server }} 超过 3 分钟, 返回值 {{ $labels.status_code }}"
+      - alert: TargetIsDown
+        expr: up != 1
+        for: 10s
+        labels:
+          policyId: "cm-l9mzpdz6"
+        annotations:
+          summary: "地址 {{ $labels.instance }} 监控信息拉取失败"
+      - alert: EtcdResponseSlow
+        expr: histogram_quantile(0.99, sum(rate(grpc_server_handling_seconds_bucket[5m]) ) by (le)) > 0.2
+        for: 10s
+        labels:
+          policyId: "cm-rs67auyk"
+        annotations:
+          summary: "etcd 响应时间超过200ms"
+      - alert: PodTrafficSurge
+        expr: sum by (pod_name) (irate(container_network_receive_bytes_total{pod_name!=""}[5m])) > 1048576
+        for: 10s
+        labels:
+          policyId: "cm-rs67auyk"
+        annotations:
+          summary: "Pod 接收速率超过1Mb/s"
+      - alert: ReplicasAvailabledZore
+        expr: kube_deployment_status_replicas_available == 0
+        for: 10s
+        labels:
+          policyId: "cm-rs67auyk"
+        annotations:
+          summary: "Deploymnet {{ $labels.deployment }}replicas available为0"
+  prometheus.yml: |
+    global:
+      scrape_interval:     15s
+      evaluation_interval: 15s
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets:
+          - alertmanager:9093
+    scrape_configs:
+    - job_name: 'node-exporter'
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_ip]
+        target_label: __address__
+        replacement: ${1}:9100  
+      - source_labels: [__meta_kubernetes_pod_host_ip]
+        target_label: instance  
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        target_label: instance_name
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_app]
+        regex: monitoring;node-exporter
+        action: keep
+    - job_name: 'node-cadvisor'
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_node_name]
+        target_label: __address__
+        replacement: ${1}:4194  
+    - job_name: 'kube-state-metrics'
+      static_configs:
+      - targets: ['kube-state-metrics:8080']
+    rule_files:
+    - "kubernetes.rules"
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring

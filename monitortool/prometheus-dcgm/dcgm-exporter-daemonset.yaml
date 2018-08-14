@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: node-gpu-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: node-gpu-exporter
+  template:
+    metadata:
+      labels:
+        app: node-gpu-exporter
+        app_type: Tapp
+        gaia_app_type: gaia_app_type_tapp
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-gpu-exporter
+                operator: In
+                values:
+                - "true"
+      containers:
+      - name: node-gpu-exporter
+        image: docker.oa.com:8080/public/dcgm-exporter:1.4.3
+        resources:
+           limits:
+             tencent.com/vcuda-core: "20"
+             tencent.com/vcuda-memory: "4"
+           requests:
+             cpu: "3"
+             memory: 1Gi
+             tencent.com/vcuda-core: "20"
+             tencent.com/vcuda-memory: "4" 
+        securityContext:
+          capabilities:
+            add:
+            - ALL
+            - NET_ADMIN
+            - SYS_ADMIN
+          runAsNonRoot: false
+          runAsUser: 0
+        volumeMounts:
+          - name: collector-textfiles
+            mountPath: /run/prometheus
+      volumes:
+        - name: collector-textfiles
+          emptyDir:
+            medium: Memory

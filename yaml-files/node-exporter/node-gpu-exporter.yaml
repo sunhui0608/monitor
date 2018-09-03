@@ -38,13 +38,13 @@ spec:
         image: docker.oa.com:8080/public/dcgm-exporter:gaia
         resources:
            limits:
-             tencent.com/vcuda-core: "20"
-             tencent.com/vcuda-memory: "4"
+             tencent.com/vcuda-core: "40"
+             tencent.com/vcuda-memory: "10"
            requests:
              cpu: "1"
              memory: 1Gi
-             tencent.com/vcuda-core: "20"
-             tencent.com/vcuda-memory: "4"
+             tencent.com/vcuda-core: "40"
+             tencent.com/vcuda-memory: "10"
         securityContext:
           capabilities:
             add:

@@ -60,7 +60,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1535976527533,
+  "iteration": 1537848107587,
   "links": [],
   "panels": [
     {
@@ -1037,5 +1037,5 @@
   "timezone": "",
   "title": "Pod 监控",
   "uid": "4JgLWRImz",
-  "version": 15
+  "version": 16
 }
